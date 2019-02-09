@@ -53,6 +53,7 @@ class HourglassController {
 
     return { success: true, message: 'All the elements are now in place' }
   }
+  
 }
 
 module.exports = HourglassController
