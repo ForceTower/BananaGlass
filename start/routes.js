@@ -17,3 +17,8 @@
 const Route = use('Route')
 
 Route.on('/').render('welcome')
+
+Route.post('/save_data', async (request) => {
+  console.log(request.request.all());
+  return { success: true, message: 'completed' }
+});

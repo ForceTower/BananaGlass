@@ -28,7 +28,7 @@ module.exports = {
   |
   */
   session: {
-    serializer: 'lucid',
+    serializer: 'LucidMongo',
     model: 'App/Models/User',
     scheme: 'session',
     uid: 'email',
@@ -71,7 +71,7 @@ module.exports = {
     scheme: 'jwt',
     uid: 'email',
     password: 'password',
-    expiry: '20m',
+    expiry: '5y',
     options: {
       secret: Env.get('appKey')
     }
@@ -92,6 +92,6 @@ module.exports = {
     token: 'App/Models/Token',
     uid: 'username',
     password: '',
-    expiry: '30d',
+    expiry: '5y',
   },
 }
