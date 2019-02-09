@@ -32,14 +32,14 @@ class HourglassController {
 
       // Creates the discipline if it doesn't exists
       const discipline = await Discipline.findOrCreate(
-        { code },
-        { code, name: disciplineName }
+        {code},
+        {code, name: disciplineName}
       )
 
       // The union of a discipline a semester and a teacher generates a class
       const clazz = await ClassStat.findOrCreate(
-        { discipline: discipline['_id'], semester, teacherHash },
-        { discipline: discipline['_id'], semester, teacher, teacherHash, semesterName }
+        {discipline: discipline['_id'], semester, teacherHash},
+        {discipline: discipline['_id'], semester, teacher, teacherHash, semesterName}
       )
 
 
@@ -51,9 +51,8 @@ class HourglassController {
       await gradeStat.save()
     }
 
-    return { success: true, message: 'All the elements are now in place' }
+    return {success: true, message: 'All the elements are now in place'}
   }
-  
 }
 
 module.exports = HourglassController
