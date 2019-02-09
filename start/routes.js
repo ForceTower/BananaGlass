@@ -16,9 +16,7 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
+
 Route.on('/').render('welcome')
 
-Route.post('/save_data', async (request) => {
-  console.log(request.request.all());
-  return { success: true, message: 'completed' }
-});
+Route.post('/save_data', 'HourglassController.onReceiveStats');
