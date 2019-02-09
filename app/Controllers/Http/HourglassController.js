@@ -43,9 +43,11 @@ class HourglassController {
       )
 
 
-      const gradeStat = await GradeStat.findBy('userHash', userHash) || new GradeStat()
-      gradeStat['userHash'] = userHash
-      gradeStat['class'] = clazz['_id']
+      const gradeStat = await GradeStat.findOrCreate(
+        { userHash, class: clazz['_id'] },
+        { userHash, class: clazz['_id'] }
+      )
+
       gradeStat['grade'] = grade
       gradeStat['partialScore'] = partialScore
       await gradeStat.save()
