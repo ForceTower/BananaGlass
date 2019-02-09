@@ -43,7 +43,7 @@ class HourglassController {
       )
 
 
-      const gradeStat = await GradeStat.findBy('userId', userHash) || new GradeStat()
+      const gradeStat = await GradeStat.findBy('userHash', userHash) || new GradeStat()
       gradeStat['userHash'] = userHash
       gradeStat['class'] = clazz['_id']
       gradeStat['grade'] = grade
