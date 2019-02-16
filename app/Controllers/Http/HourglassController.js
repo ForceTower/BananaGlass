@@ -55,6 +55,11 @@ class HourglassController {
 
     return {success: true, message: 'All the elements are now in place'}
   }
+
+  async onRequestStats({ request }) {
+    const disciplines = Discipline.with('classes').fetch()
+    return {success: true, message: 'All the elements where returned', data: disciplines}
+  }
 }
 
 module.exports = HourglassController
