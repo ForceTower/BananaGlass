@@ -57,7 +57,23 @@ class HourglassController {
   }
 
   async onRequestStats({ request }) {
-    const disciplines = Discipline.with('classes').fetch()
+    const result = []
+    const disciplines = await Discipline.with('classes').fetch()
+    /*
+    for (let i = 0; i < disciplines.length; i++) {
+      const classResult = []
+      const discipline = disciplines[i]
+      const classes = discipline.classes()
+      for (let j = 0; j < classes.length; j++) {
+        const clazz = classes[j]
+        const grades = clazz.grades()
+        for (let k = 0; k < grades.length; k++) {
+
+        }
+      }
+    }
+    */
+
     return {success: true, message: 'All the elements where returned', data: disciplines}
   }
 }
