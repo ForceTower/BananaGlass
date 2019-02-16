@@ -4,6 +4,9 @@
 const Model = use('Model')
 
 class GradeStat extends Model {
+  static get hidden () {
+    return ['userHash']
+  }
 }
 
 module.exports = GradeStat
