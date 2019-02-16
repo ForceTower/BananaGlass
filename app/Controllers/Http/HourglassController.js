@@ -57,24 +57,10 @@ class HourglassController {
   }
 
   async onRequestStats({ request }) {
-    const result = []
-    const disciplines = await Discipline.with('classes').fetch()
-    /*
-    for (let i = 0; i < disciplines.length; i++) {
-      const classResult = []
-      const discipline = disciplines[i]
-      const classes = discipline.classes()
-      for (let j = 0; j < classes.length; j++) {
-        const clazz = classes[j]
-        const grades = clazz.grades()
-        for (let k = 0; k < grades.length; k++) {
+    const disciplines = await Discipline.with('classes').with('classes.grades').fetch()
+    const uefsAvg = await GradeStat.avg('grade');
 
-        }
-      }
-    }
-    */
-
-    return {success: true, message: 'All the elements where returned', data: disciplines}
+    return {success: true, message: 'All the elements where returned', score: uefsAvg, data: disciplines}
   }
 }
 
