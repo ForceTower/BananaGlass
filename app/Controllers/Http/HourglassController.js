@@ -1,4 +1,5 @@
 'use strict'
+const _ = use('lodash')
 const Discipline = use('App/Models/Discipline')
 const ClassStat = use('App/Models/ClassStat')
 const Teacher = use('App/Models/Teacher')
@@ -61,32 +62,173 @@ class HourglassController {
     return {success: true, message: 'All the elements are now in place'}
   }
 
+  async processDiscipline(discipline) {
+    let result = {}
+    let disciplineTotal = 0
+    let disciplineStore = 0
+    let disciplineDirect = 0
+    let disciplineFinal = 0
+    let disciplinePassed = 0
+
+    const { classes } = discipline
+
+    const semesters = _.chain(classes)
+      .groupBy('semesterName')
+      .map((value, key) => {
+        const gradesOnly = _.chain(value).map(res => res.grades).value()
+        const grades = [].concat.apply([], gradesOnly)
+        const average = _.chain(grades).meanBy('grade').value()
+
+        return {
+          semester: key,
+          average
+        }
+      })
+      .value()
+
+    const teachers = _.chain(classes)
+      .groupBy('teacher')
+      .map((value, key) => {
+        const gradesOnly = _.chain(value).map(res => res.grades).value()
+        const grades = [].concat.apply([], gradesOnly)
+        const average = _.chain(grades).meanBy('grade').value()
+
+        const bySemester = _.chain(value)
+          .groupBy('semesterName')
+          .map((value, key) => {
+            const gradesOnly = _.chain(value).map(res => res.grades).value()
+            const grades = [].concat.apply([], gradesOnly)
+            const average = _.chain(grades).meanBy('grade').value()
+
+            return {
+              semester: key,
+              average
+            }
+          })
+          .value()
+
+        return {
+          teacher: key,
+          average,
+          semesters: bySemester
+        }
+      })
+      .value()
+
+    for (let clazz of discipline.classes) {
+      let totalGrades = clazz.grades.length
+      let accumGrades = 0
+
+      for (let grade of clazz.grades) {
+        accumGrades += grade.grade || 0
+
+        const {grade: actual, partialScore} = grade
+        if (actual >= 5) {
+          disciplinePassed++
+        }
+        if (partialScore) {
+          disciplineFinal++;
+        }
+        if (actual >= 7 && !partialScore) {
+          disciplineDirect++;
+        }
+      }
+
+      disciplineStore += accumGrades
+      disciplineTotal += totalGrades
+    }
+
+    result['id'] = discipline['_id']
+    result['code'] = discipline['code']
+    result['name'] = discipline['name']
+    result['semesters'] = semesters
+    result['teachers'] = teachers
+    result['mean'] = disciplineStore / disciplineTotal
+    result['total'] = disciplineTotal
+    result['passed'] = disciplinePassed
+    result['finals'] = disciplineFinal
+    result['direct'] = disciplineDirect
+    console.log(result)
+    return result
+  }
+
+  async requestDiscipline({ request }) {
+    const data = request.all()
+    const { code } = data
+    if (!code) {
+      return {success: false, message: 'The discipline code is mandatory!' }
+    }
+
+    const discipline = await Discipline
+      .where('code', code)
+      .with('classes')
+      .with('classes.grades')
+      .first()
+
+    if (!discipline) {
+      return {success: false, message: `The discipline ${code} is not registered under the UNESVerse`}
+    }
+
+    const json = JSON.stringify(discipline)
+    const value = JSON.parse(json)
+
+    const result = await this.processDiscipline(value)
+  }
+
   async onRequestStats({ request }) {
-    const values = await Discipline.with('classes').with('classes.grades').fetch()
+    const values = await Discipline
+      .with('classes')
+      .with('classes.grades')
+      .fetch()
+
     const uefsAvg = await GradeStat.avg('grade');
 
     const json = JSON.stringify(values)
     const disciplines = JSON.parse(json)
 
-    const teachers = []
+    const result = []
 
     for (let discipline of disciplines) {
-      let totalClasses = 0
-      let accumClasses = 0
+      const partial = await this.processDiscipline(discipline)
+      result.push(partial)
 
-      for (let clazz of discipline.classes) {
-        let totalGrades = clazz.grades.length
-        let accumGrades = 0
-
-        for (let grade of clazz.grades) {
-
-        }
-
-        totalClasses += totalGrades
-      }
+      // let disciplineTotal = 0
+      // let disciplineStore = 0
+      // let disciplineDirect = 0
+      // let disciplineFinal = 0
+      // let disciplinePassed = 0
+      //
+      // for (let clazz of discipline.classes) {
+      //   let totalGrades = clazz.grades.length
+      //   let accumGrades = 0
+      //
+      //   for (let grade of clazz.grades) {
+      //     accumGrades += grade.grade || 0
+      //
+      //     const { grade: actual, partialScore } = grade
+      //     if (actual >= 5) {
+      //       disciplinePassed++
+      //     }
+      //     if (partialScore) {
+      //       disciplineFinal++;
+      //     }
+      //     if (actual >= 7 && !partialScore) {
+      //       disciplineDirect++;
+      //     }
+      //   }
+      //
+      //   disciplineStore += accumGrades
+      //   disciplineTotal += totalGrades
+      // }
+      //
+      // discipline['mean'] = disciplineStore / disciplineTotal
+      // discipline['total'] = disciplineTotal
+      // discipline['passed'] = disciplinePassed
+      // discipline['finals'] = disciplineFinal
+      // discipline['direct'] = disciplineDirect
     }
 
-    return {success: true, message: 'All the elements were returned', score: uefsAvg, data: disciplines}
+    return {success: true, message: 'All the elements were returned', score: uefsAvg, data: result}
   }
 }
 
