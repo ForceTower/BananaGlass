@@ -5,7 +5,7 @@ const Model = use('Model')
 
 class ClassStat extends Model {
   grades() {
-    return this.hasMany('App/Model/GradeStat', '_id', 'class')
+    return this.hasMany('app/Models/GradeStat', '_id', 'class')
   }
 }
 
