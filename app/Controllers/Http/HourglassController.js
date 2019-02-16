@@ -1,6 +1,7 @@
 'use strict'
 const Discipline = use('App/Models/Discipline')
 const ClassStat = use('App/Models/ClassStat')
+const Teacher = use('App/Models/Teacher')
 const GradeStat = use('App/Models/GradeStat')
 const crypto = require("crypto")
 
@@ -36,12 +37,16 @@ class HourglassController {
         {code, name: disciplineName}
       )
 
+      const teach = await Teacher.findOrCreate(
+        {teacherHash},
+        {teacherHash, teacher}
+      )
+
       // The union of a discipline a semester and a teacher generates a class
       const clazz = await ClassStat.findOrCreate(
         {discipline: discipline['_id'], semester, teacherHash},
-        {discipline: discipline['_id'], semester, teacher, teacherHash, semesterName}
+        {discipline: discipline['_id'], semester, teacher, teacherHash, semesterName, teacherId: teach['_id']}
       )
-
 
       const gradeStat = await GradeStat.findOrCreate(
         { userHash, class: clazz['_id'] },
@@ -57,8 +62,29 @@ class HourglassController {
   }
 
   async onRequestStats({ request }) {
-    const disciplines = await Discipline.with('classes').with('classes.grades').fetch()
+    const values = await Discipline.with('classes').with('classes.grades').fetch()
     const uefsAvg = await GradeStat.avg('grade');
+
+    const json = JSON.stringify(values)
+    const disciplines = JSON.parse(json)
+
+    const teachers = []
+
+    for (let discipline of disciplines) {
+      let totalClasses = 0
+      let accumClasses = 0
+
+      for (let clazz of discipline.classes) {
+        let totalGrades = clazz.grades.length
+        let accumGrades = 0
+
+        for (let grade of clazz.grades) {
+
+        }
+
+        totalClasses += totalGrades
+      }
+    }
 
     return {success: true, message: 'All the elements were returned', score: uefsAvg, data: disciplines}
   }
