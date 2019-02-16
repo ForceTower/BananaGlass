@@ -100,9 +100,31 @@ class HourglassController {
             const grades = [].concat.apply([], gradesOnly)
             const average = _.chain(grades).meanBy('grade').value()
 
+            let bySemesterPassed = 0
+            let bySemesterDirect = 0
+            let bySemesterFinal = 0
+            const bySemesterTotal = grades.length
+
+            for (let grade of grades) {
+              const {grade: actual, partialScore} = grade
+              if (actual >= 5) {
+                bySemesterPassed++
+              }
+              if (partialScore) {
+                bySemesterFinal++;
+              }
+              if (actual >= 7 && !partialScore) {
+                bySemesterDirect++;
+              }
+            }
+
             return {
               semester: key,
-              average
+              average,
+              total: bySemesterTotal,
+              passed: bySemesterPassed,
+              direct: bySemesterDirect,
+              finals: bySemesterFinal
             }
           })
           .value()
