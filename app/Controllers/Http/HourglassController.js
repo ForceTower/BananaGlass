@@ -60,7 +60,7 @@ class HourglassController {
     const disciplines = await Discipline.with('classes').with('classes.grades').fetch()
     const uefsAvg = await GradeStat.avg('grade');
 
-    return {success: true, message: 'All the elements where returned', score: uefsAvg, data: disciplines}
+    return {success: true, message: 'All the elements were returned', score: uefsAvg, data: disciplines}
   }
 }
 
