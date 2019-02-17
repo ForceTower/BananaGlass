@@ -20,4 +20,5 @@ const Route = use('Route')
 Route.on('/').render('welcome')
 
 Route.post('/save_data', 'HourglassController.onReceiveStats');
-Route.get('/everything', 'HourglassController.onRequestStats');
+Route.get('/everythingship', 'HourglassController.onRequestStats');
+Route.get('/overview', 'HourglassController.overview');

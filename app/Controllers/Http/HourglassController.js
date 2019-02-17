@@ -59,7 +59,8 @@ class HourglassController {
       await gradeStat.save()
     }
 
-    return {success: true, message: 'All the elements are now in place'}
+    const overview = await this.overview({request})
+    return overview
   }
 
   async processDiscipline(discipline) {
@@ -178,7 +179,7 @@ class HourglassController {
     const data = request.all()
     const { code } = data
     if (!code) {
-      return {success: false, message: 'The discipline code is mandatory!' }
+      return {success: false, message: 'The discipline code is mandatory!', data: null}
     }
 
     const discipline = await Discipline
@@ -188,13 +189,14 @@ class HourglassController {
       .first()
 
     if (!discipline) {
-      return {success: false, message: `The discipline ${code} is not registered under the UNESVerse`}
+      return {success: false, message: `The discipline ${code} is not registered under the UNESVerse`, data: null}
     }
 
     const json = JSON.stringify(discipline)
     const value = JSON.parse(json)
 
     const result = await this.processDiscipline(value)
+    return {success: true, message: 'The discipline has been returned', data: result}
   }
 
   async onRequestStats({ request }) {
@@ -213,44 +215,15 @@ class HourglassController {
     for (let discipline of disciplines) {
       const partial = await this.processDiscipline(discipline)
       result.push(partial)
-
-      // let disciplineTotal = 0
-      // let disciplineStore = 0
-      // let disciplineDirect = 0
-      // let disciplineFinal = 0
-      // let disciplinePassed = 0
-      //
-      // for (let clazz of discipline.classes) {
-      //   let totalGrades = clazz.grades.length
-      //   let accumGrades = 0
-      //
-      //   for (let grade of clazz.grades) {
-      //     accumGrades += grade.grade || 0
-      //
-      //     const { grade: actual, partialScore } = grade
-      //     if (actual >= 5) {
-      //       disciplinePassed++
-      //     }
-      //     if (partialScore) {
-      //       disciplineFinal++;
-      //     }
-      //     if (actual >= 7 && !partialScore) {
-      //       disciplineDirect++;
-      //     }
-      //   }
-      //
-      //   disciplineStore += accumGrades
-      //   disciplineTotal += totalGrades
-      // }
-      //
-      // discipline['mean'] = disciplineStore / disciplineTotal
-      // discipline['total'] = disciplineTotal
-      // discipline['passed'] = disciplinePassed
-      // discipline['finals'] = disciplineFinal
-      // discipline['direct'] = disciplineDirect
     }
 
     return {success: true, message: 'All the elements were returned', score: uefsAvg, data: result}
+  }
+
+  async overview({ request }) {
+    const disciplines = await Discipline.all()
+    const teachers = await Teacher.all()
+    return {success: true, message: 'This are the things...', data: { disciplines, teachers }}
   }
 }
 
