@@ -22,4 +22,4 @@ Route.on('/').render('welcome')
 Route.post('/save_data', 'HourglassController.onReceiveStats');
 Route.get('/everythingship', 'HourglassController.onRequestStats');
 Route.get('/overview', 'HourglassController.overview');
-Route.get('/discipline', 'HourglassController.requestDiscipline');
+Route.post('/discipline', 'HourglassController.requestDiscipline');
